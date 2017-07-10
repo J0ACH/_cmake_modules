@@ -63,7 +63,7 @@ FUNCTION (RegisterAdd)
 	message(STATUS "RegisterAdd macro init")
 
 	set(oneValueArgs NAME KEY VALUE)
-	set(multiValueArgs GIT_FOLDERS)
+	set(multiValueArgs )
 	set(options VERBATIM)
 
     CMAKE_PARSE_ARGUMENTS( RegisterAdd "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -74,8 +74,56 @@ FUNCTION (RegisterAdd)
 		VERBATIM TRUE
 	)
 
+	set(reg_path HKEY_CURRENT_USER\\Software\\Kitware\\CMake\\Packages\\${RegisterAdd_NAME})
+	IF (WIN32)
+		EXECUTE_PROCESS (
+			COMMAND reg add ${reg_path} /v ${RegisterAdd_KEY} /d ${RegisterAdd_VALUE} /t REG_SZ /f
+			RESULT_VARIABLE RT
+			ERROR_VARIABLE  ERR
+			OUTPUT_QUIET
+		)
+
+		IF (RT EQUAL 0)
+			MESSAGE (STATUS "\t- key [" ${RegisterAdd_KEY} "] added to register with value: " ${RegisterAdd_VALUE})
+		ELSE ()
+			STRING (STRIP "${ERR}" ERR)
+			MESSAGE (STATUS "Register: Failed to add registry entry: ${ERR}")
+		ENDIF ()
+	ENDIF (WIN32)
 	
 	message(STATUS "RegisterAdd macro done...\n")
 	
 
 ENDFUNCTION (RegisterAdd)
+
+################################################################################################
+
+FUNCTION (RegisterGet)
+
+	message(STATUS "")	
+	message(STATUS "RegisterGet macro init")
+
+	set(oneValueArgs NAME KEY RETURN)
+	set(multiValueArgs )
+	set(options VERBATIM)
+
+    CMAKE_PARSE_ARGUMENTS( RegisterGet "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+	RegisterCheckFunctionRequiredKeys(
+		FUNCTION RegisterGet
+		KEYS NAME KEY
+		VERBATIM TRUE
+	)
+
+	set(reg_path HKEY_CURRENT_USER\\Software\\Kitware\\CMake\\Packages\\${RegisterGet_NAME})
+	GET_FILENAME_COMPONENT(value "[${reg_path};${RegisterGet_KEY}]" ABSOLUTE)
+	set(${RegisterGet_RETURN} ${value} PARENT_SCOPE)
+
+	if(RegisterGet_VERBATIM)
+		MESSAGE (STATUS "\t- key [" ${RegisterGet_KEY} "] get value from register: " ${value})
+	endif(RegisterGet_VERBATIM)
+	
+	message(STATUS "RegisterGet macro done...\n")
+	
+
+ENDFUNCTION (RegisterGet)
