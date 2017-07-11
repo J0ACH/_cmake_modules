@@ -3,22 +3,24 @@ cmake_minimum_required( VERSION 3.7.2 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
+include(RegisterModule)
 set(TEST_RegisterAdd OFF)
-set(TEST_RegisterGet ON)
+set(TEST_RegisterGet OFF)
+
+include(GitModule)
+set(TEST_GitClone ON)
 
 ################################################################################################
 
-include(RegisterModule)
-
-if(${TEST_RegisterAdd})
+if(TEST_RegisterAdd)
 	RegisterAdd(
 		NAME "Pokus"
 		KEY "Base"
 		VALUE "C:/"
 	)
-endif(${TEST_RegisterAdd})
+endif(TEST_RegisterAdd)
 
-if(${TEST_RegisterGet})
+if(TEST_RegisterGet)
 	set(TEST_RegisterGet_answer)
 	RegisterGet(
 		NAME "Pokus"
@@ -28,6 +30,14 @@ if(${TEST_RegisterGet})
 		RETURN TEST_RegisterGet_answer
 	)
 	message(STATUS "TEST_RegisterGet_answer: " ${TEST_RegisterGet_answer})
-endif(${TEST_RegisterGet})
+endif(TEST_RegisterGet)
 
 ################################################################################################
+
+if(TEST_GitClone)
+	GitClone(
+		NAME SharedLib
+		GIT https://github.com/J0ACH/_template_SharedLib.git
+		PATH ${CMAKE_SOURCE_DIR}/build/externalLibs
+	)
+endif(TEST_GitClone)
