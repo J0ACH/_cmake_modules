@@ -12,6 +12,15 @@
 		- hodnota klice
 	)
 
+	RegisterGet(
+		NAME "Pokus"
+			- nazev folderu v cilove ceste registru
+		KEY "treba_aaa"
+			- nazev klice
+		RETURN TEST_var
+		- promena, ktera bude vyplnena dotazovanou hodnotou
+	)
+
 	RegisterCheckFunctionRequiredKeys(
 		FUNCTION RegisterAdd
 			- nazev kontrolavane funkce 
@@ -26,13 +35,13 @@
 
 message(STATUS "Module ${CMAKE_CURRENT_LIST_FILE} loaded")
 
-FUNCTION (RegisterCheckFunctionRequiredKeys)
+function (RegisterCheckFunctionRequiredKeys)
 
 	set(oneValueArgs FUNCTION)
 	set(multiValueArgs KEYS)
 	set(options VERBATIM)
 
-    CMAKE_PARSE_ARGUMENTS( RegisterCheckRequiredKeys "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    cmake_parse_arguments( RegisterCheckRequiredKeys "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
 	if(RegisterCheckRequiredKeys_FUNCTION)
 		if(RegisterCheckRequiredKeys_VERBATIM)
@@ -42,7 +51,7 @@ FUNCTION (RegisterCheckFunctionRequiredKeys)
 		message( FATAL_ERROR "RegisterCheckRequiredKeys: 'FUNCTION' argument required." )
 	endif(RegisterCheckRequiredKeys_FUNCTION)
 
-	FOREACH(oneKey ${RegisterCheckRequiredKeys_KEYS})
+	foreach(oneKey ${RegisterCheckRequiredKeys_KEYS})
 		set(oneVar ${RegisterCheckRequiredKeys_FUNCTION}_${oneKey})
 		if(${oneVar})
 			if(RegisterCheckRequiredKeys_VERBATIM)
@@ -51,22 +60,21 @@ FUNCTION (RegisterCheckFunctionRequiredKeys)
 		else()
 			message( FATAL_ERROR "RegisterAdd: '" ${oneKey} "' argument required." )
 		endif(${oneVar})
-	ENDFOREACH(oneKey)
-
-ENDFUNCTION (RegisterCheckFunctionRequiredKeys)
+	endforeach(oneKey)
+endfunction (RegisterCheckFunctionRequiredKeys)
 
 ################################################################################################
 
-FUNCTION (RegisterAdd)
+function (RegisterAdd)
 
 	message(STATUS "")	
 	message(STATUS "RegisterAdd macro init")
 
 	set(oneValueArgs NAME KEY VALUE)
 	set(multiValueArgs )
-	set(options VERBATIM)
+	set(options PATH VERBATIM)
 
-    CMAKE_PARSE_ARGUMENTS( RegisterAdd "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    cmake_parse_arguments( RegisterAdd "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
 	RegisterCheckFunctionRequiredKeys(
 		FUNCTION RegisterAdd
@@ -75,26 +83,42 @@ FUNCTION (RegisterAdd)
 	)
 
 	set(reg_path HKEY_CURRENT_USER\\Software\\Kitware\\CMake\\Packages\\${RegisterAdd_NAME})
-	IF (WIN32)
-		EXECUTE_PROCESS (
+	if (WIN32)
+		execute_process (
 			COMMAND reg add ${reg_path} /v ${RegisterAdd_KEY} /d ${RegisterAdd_VALUE} /t REG_SZ /f
 			RESULT_VARIABLE RT
 			ERROR_VARIABLE  ERR
 			OUTPUT_QUIET
 		)
 
-		IF (RT EQUAL 0)
-			MESSAGE (STATUS "\t- key [" ${RegisterAdd_KEY} "] added to register with value: " ${RegisterAdd_VALUE})
-		ELSE ()
-			STRING (STRIP "${ERR}" ERR)
-			MESSAGE (STATUS "Register: Failed to add registry entry: ${ERR}")
-		ENDIF ()
-	ENDIF (WIN32)
+		if (RT EQUAL 0)
+			message (STATUS "\t- key [" ${RegisterAdd_KEY} "] added to register with value: " ${RegisterAdd_VALUE})
+		else ()
+			string (STRIP "${ERR}" ERR)
+			message (STATUS "Register: Failed to add registry entry: ${ERR}")
+		endif ()
+	endif (WIN32)
+
+	if (UNIX)
+		message(STATUS "RegisterAdd: chybi definice pro Linux...\n")
+
+		#[[
+			if (WIN32)
+				.......
+			elseif (IS_DIRECTORY "$ENV{HOME}")
+			file (WRITE "${BINARY_CONFIG_DIR}/${PackageName}RegistryFile" "${PackageConfig_Dir}")
+			install (
+				FILES       "${BINARY_CONFIG_DIR}/${PackageName}RegistryFile"
+				DESTINATION "$ENV{HOME}/.cmake/packages/${PackageName}"
+				RENAME      "${CMAKE_CONFIGURATION_TYPES}"
+			)
+			endif ()
+		#]]
+
+	endif (UNIX)
 	
 	message(STATUS "RegisterAdd macro done...\n")
-	
-
-ENDFUNCTION (RegisterAdd)
+endfunction (RegisterAdd)
 
 ################################################################################################
 
@@ -107,7 +131,7 @@ FUNCTION (RegisterGet)
 	set(multiValueArgs )
 	set(options VERBATIM)
 
-    CMAKE_PARSE_ARGUMENTS( RegisterGet "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    cmake_parse_arguments( RegisterGet "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
 	RegisterCheckFunctionRequiredKeys(
 		FUNCTION RegisterGet
@@ -116,7 +140,12 @@ FUNCTION (RegisterGet)
 	)
 
 	set(reg_path HKEY_CURRENT_USER\\Software\\Kitware\\CMake\\Packages\\${RegisterGet_NAME})
-	GET_FILENAME_COMPONENT(value "[${reg_path};${RegisterGet_KEY}]" ABSOLUTE)
+	get_filename_component(value "[${reg_path};${RegisterGet_KEY}]" ABSOLUTE)
+	
+	if(value STREQUAL "/registry")
+		set(value "-NOTFOUND")
+	endif(value STREQUAL "/registry")
+
 	set(${RegisterGet_RETURN} ${value} PARENT_SCOPE)
 
 	if(RegisterGet_VERBATIM)
@@ -124,6 +153,4 @@ FUNCTION (RegisterGet)
 	endif(RegisterGet_VERBATIM)
 	
 	message(STATUS "RegisterGet macro done...\n")
-	
-
 ENDFUNCTION (RegisterGet)

@@ -3,6 +3,9 @@ cmake_minimum_required( VERSION 3.7.2 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
+set(TEST_RegisterAdd OFF)
+set(TEST_RegisterGet ON)
+
 ################################################################################################
 
 include(RegisterModule)
@@ -19,8 +22,8 @@ if(${TEST_RegisterGet})
 	set(TEST_RegisterGet_answer)
 	RegisterGet(
 		NAME "Pokus"
-		#KEY "AAA"
-		KEY "Base"
+		KEY "AAA"
+		#KEY "Base"
 		VERBATIM TRUE
 		RETURN TEST_RegisterGet_answer
 	)
