@@ -37,7 +37,7 @@ endif(TEST_RegisterGet)
 if(TEST_GitClone)
 	GitClone(
 		NAME SharedLib
-		GIT https://github.com/J0ACH/_template_SharedLib.git
+		GIT https://github.com/J0ACH/testGitLib.git
 		PATH ${CMAKE_SOURCE_DIR}/build/externalLibs
 	)
 endif(TEST_GitClone)
