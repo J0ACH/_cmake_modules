@@ -8,7 +8,7 @@ set(TEST_RegisterAdd OFF)
 set(TEST_RegisterGet OFF)
 
 include(GitModule)
-set(TEST_GitClone ON)
+set(TEST_GitClone OFF)
 
 ################################################################################################
 
@@ -37,7 +37,8 @@ endif(TEST_RegisterGet)
 if(TEST_GitClone)
 	GitClone(
 		NAME SharedLib
-		GIT https://github.com/J0ACH/testGitLib.git
+		GIT https://github.com/J0ACH/_template_SharedLib.git
+		#GIT https://github.com/J0ACH/testGitLib.git
 		PATH ${CMAKE_SOURCE_DIR}/build/externalLibs
 	)
 endif(TEST_GitClone)

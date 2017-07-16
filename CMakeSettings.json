@@ -8,17 +8,7 @@
       "buildRoot": "${projectDir}\\build\\cache\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-m -v:minimal",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "TEST_RegisterAdd",
-          "value": "ON"
-        },
-        {
-          "name": "TEST_RegisterGet2",
-          "value": "ON"
-        }
-      ]
+      "ctestCommandArgs": ""      
     },
     {
       "name": "Release",
@@ -27,13 +17,7 @@
       "buildRoot": "${projectDir}\\build\\cache\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-m -v:minimal",
-      "ctestCommandArgs": "",
-      "variables": [
-        {
-          "name": "TEST_RegisterAdd",
-          "value": "ON"
-        }
-      ]
+      "ctestCommandArgs": ""      
     }
   ]
 }

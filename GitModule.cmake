@@ -70,15 +70,19 @@ function (GitClone)
 	message(STATUS "")	
 	message(STATUS "GitClone macro init")
 
-	set(oneValueArgs NAME GIT PATH)
+	set(oneValueArgs NAME GIT PATH BRANCH)
 	set(multiValueArgs )
 	set(options VERBATIM)
 
-    cmake_parse_arguments( GitClone "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+	cmake_parse_arguments( GitClone "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+	if(NOT GitClone_BRANCH)
+		set(GitClone_BRANCH "master")
+	endif(NOT GitClone_BRANCH)
 
 	CheckRequiredKeys(
 		FUNCTION GitClone
-		KEYS NAME GIT PATH
+		KEYS NAME GIT BRANCH PATH
 		VERBATIM TRUE
 	)
 
@@ -87,9 +91,9 @@ function (GitClone)
 	set(_GitSourceDir ${_GitMainDir}/src)
 	set(_GitCacheDir ${_GitMainDir}/cache)
 	message(STATUS "GitInitBuildFile: " ${_GitDownloadDir})
-
+	
 	file(MAKE_DIRECTORY ${GitClone_PATH})
-		
+	
 	set(BuildFile 
 		"cmake_minimum_required(VERSION 2.8.2)\n"
 		"project(${GitClone_NAME}-download NONE)\n"
@@ -97,7 +101,7 @@ function (GitClone)
 		"include(ExternalProject)"
 		"ExternalProject_Add(${GitClone_NAME}-download"
 			"\tGIT_REPOSITORY      ${GitClone_GIT}"
-			"\tGIT_TAG			   master"
+			"\tGIT_TAG			   ${GitClone_BRANCH}"
 			"\tDOWNLOAD_DIR		   ${_GitCacheDir}" 
 			"\tSOURCE_DIR          ${_GitSourceDir}"
 			"\tBINARY_DIR          ${_GitCacheDir}"
@@ -106,9 +110,9 @@ function (GitClone)
 	)
 
 	set(ConfigTxt "") 
-	message(STATUS "\t - ConfigTxt:")
+	#message(STATUS "\t - ConfigTxt:")
 	foreach(oneLine ${BuildFile})
-	 	message(STATUS "\t\t - " ${oneLine})
+	 	#message(STATUS "\t\t - " ${oneLine})
 		set(ConfigTxt "${ConfigTxt} ${oneLine} \n")
 	endforeach(oneLine)
 	
