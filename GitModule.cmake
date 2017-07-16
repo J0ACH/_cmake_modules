@@ -128,7 +128,9 @@ function (GitClone)
     endif()
 
 	execute_process(
-		COMMAND ${CMAKE_COMMAND} --build .
+		COMMAND ${CMAKE_COMMAND} 
+			--build .
+			--config Release
 		RESULT_VARIABLE result
 		WORKING_DIRECTORY ${_GitDownloadDir}
 	)
